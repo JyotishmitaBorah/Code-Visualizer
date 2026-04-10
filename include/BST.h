@@ -2,6 +2,9 @@
 #define BST_H
 
 #include "DataStructure.h"
+#include <vector>
+#include <string>
+using namespace std;
 
 struct BSTNode {
     int data;
@@ -12,7 +15,15 @@ struct BSTNode {
 class BST : public DataStructure {
     BSTNode* root;
 
+    // Existing
     BSTNode* insertNode(BSTNode*, int, vector<string>&);
+
+    // ✅ ADD THESE
+    BSTNode* deleteNode(BSTNode*, int, vector<string>&);
+    BSTNode* minValueNode(BSTNode*);
+
+    // ✅ FIX SIGNATURE
+    void printTree(BSTNode*, string, bool, string&);
 
 public:
     BST();
