@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Data Structure Visualizer</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            text-align: center;
+        }
+
+        input {
+            padding: 12px;
+            width: 300px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            background: #3b82f6;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #2563eb;
+        }
+
+        #output {
+            margin-top: 20px;
+            padding: 20px;
+            background: #1e293b;
+            min-height: 100px;
+            width: 60%;
+            margin: auto;
+            border-radius: 10px;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Data Structure Visualizer</h1>
+
+<input type="text" id="input" placeholder="Enter values (e.g. 10 20 30)">
+<br>
+
+<button onclick="run('ll')">Linked List</button>
+<button onclick="run('stack')">Stack</button>
+<button onclick="run('queue')">Queue</button>
+<button onclick="run('bst')">BST</button>
+<button onclick="run('avl')">AVL</button>
+
+<canvas id="canvas" width="800" height="400"
+style="background:#1e293b; margin-top:20px; border-radius:10px;"></canvas>
+
+<div id="output">Output will appear here...</div>
+
+<script>
+
+// 🌳 NODE
+class Node {
+    constructor(data) {
+        this.data = data;
+        this.left = null;
+        this.right = null;
+        this.height = 1;
+    }
+}
+
+// ================= BST =================
+function insertBST(root, val) {
+    if (!root) return new Node(val);
+
+    if (val < root.data)
+        root.left = insertBST(root.left, val);
+    else
+        root.right = insertBST(root.right, val);
+
+    return root;
+}
+
+function buildBST(arr) {
+    let root = null;
+    for (let v of arr) root = insertBST(root, v);
+    return root;
+}
+
+// ================= AVL =================
+function getHeight(n) { return n ? n.height : 0; }
+
+function getBalance(n) {
+    return n ? getHeight(n.left) - getHeight(n.right) : 0;
+}
+
+function rightRotate(y) {
+    let x = y.left;
+    let t2 = x.right;
+
+    x.right = y;
+    y.left = t2;
+
+    y.height = 1 + Math.max(getHeight(y.left), getHeight(y.right));
+    x.height = 1 + Math.max(getHeight(x.left), getHeight(x.right));
+
+    return x;
+}
+
+function leftRotate(x) {
+    let y = x.right;
+    let t2 = y.left;
+
+    y.left = x;
+    x.right = t2;
+
+    x.height = 1 + Math.max(getHeight(x.left), getHeight(x.right));
+    y.height = 1 + Math.max(getHeight(y.left), getHeight(y.right));
+
+    return y;
+}
+
+function insertAVL(node, key) {
+    if (!node) return new Node(key);
+
+    if (key < node.data)
+        node.left = insertAVL(node.left, key);
+    else if (key > node.data)
+        node.right = insertAVL(node.right, key);
+    else
+        return node;
+
+    node.height = 1 + Math.max(getHeight(node.left), getHeight(node.right));
+
+    let balance = getBalance(node);
+
+    if (balance > 1 && key < node.left.data)
+        return rightRotate(node);
+
+    if (balance < -1 && key > node.right.data)
+        return leftRotate(node);
+
+    if (balance > 1 && key > node.left.data) {
+        node.left = leftRotate(node.left);
+        return rightRotate(node);
+    }
+
+    if (balance < -1 && key < node.right.data) {
+        node.right = rightRotate(node.right);
+        return leftRotate(node);
+    }
+
+    return node;
+}
+
+function buildAVL(arr) {
+    let root = null;
+    for (let v of arr) root = insertAVL(root, v);
+    return root;
+}
+
+// ================= DRAW TREE =================
+function drawTree(root) {
+    let canvas = document.getElementById("canvas");
+    let ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    function draw(node, x, y, gap) {
+        if (!node) return;
+
+        if (node.left) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x - gap, y + 60);
+            ctx.stroke();
+            draw(node.left, x - gap, y + 60, gap / 1.5);
+        }
+
+        if (node.right) {
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + gap, y + 60);
+            ctx.stroke();
+            draw(node.right, x + gap, y + 60, gap / 1.5);
+        }
+
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0, 2 * Math.PI);
+        ctx.fillStyle = "#3b82f6";
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "white";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(node.data, x, y);
+    }
+
+    draw(root, canvas.width / 2, 40, 120);
+}
+
+// ================= MAIN =================
+function run(type) {
+    let input = document.getElementById("input").value;
+    let arr = input.split(" ").filter(x => x !== "").map(Number);
+
+    let canvas = document.getElementById("canvas");
+    let ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    let output = "";
+
+    if (type === 'bst') {
+        drawTree(buildBST(arr));
+        output = "BST Tree 🌳";
+    }
+
+    else if (type === 'avl') {
+        drawTree(buildAVL(arr));
+        output = "Balanced AVL Tree 🌳";
+    }
+
+    else if (type === 'll') {
+        output = arr.join(" → ") + " → NULL";
+    }
+
+    else if (type === 'stack') {
+        output = "Top\n" + arr.slice().reverse().join("\n");
+    }
+
+    else if (type === 'queue') {
+        output = "Front → " + arr.join(" → ") + " ← Rear";
+    }
+
+    document.getElementById("output").innerText = output;
+}
+
+</script>
+
+</body>
+</html>

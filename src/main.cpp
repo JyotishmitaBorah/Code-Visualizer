@@ -1,3 +1,4 @@
+#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <vector>
 #include "../include/LinkedList.h"
@@ -8,116 +9,117 @@
 
 using namespace std;
 
-void clearScreen();
-void showHeader();
-void displaySteps(vector<string>);
-void displayStructure(string);
-
 int main() {
+    sf::RenderWindow window(sf::VideoMode(900, 600), "Code Visualizer UI");
+
+    // Data structures
     LinkedList ll;
     StackDS st;
     QueueDS q;
     BST bst;
     AVL avl;
 
-    while (true) {
-        clearScreen();
-        showHeader();
+    int selectedDS = 0;
 
-        cout << "\nSelect Data Structure:\n";
-        cout << "1. Linked List\n2. Stack\n3. Queue\n4. BST\n5. AVL\n6. Exit\nChoice: ";
+    // Buttons
+    sf::RectangleShape btnLL(sf::Vector2f(150, 50));
+    btnLL.setPosition(50, 100);
+    btnLL.setFillColor(sf::Color::Blue);
 
-        int ds;
-        cin >> ds;
+    sf::RectangleShape btnStack(sf::Vector2f(150, 50));
+    btnStack.setPosition(50, 170);
+    btnStack.setFillColor(sf::Color::Blue);
 
-        if (ds == 6) break;
+    sf::RectangleShape btnQueue(sf::Vector2f(150, 50));
+    btnQueue.setPosition(50, 240);
+    btnQueue.setFillColor(sf::Color::Blue);
 
-        while (true) {
-            clearScreen();
-            showHeader();
+    sf::RectangleShape btnBST(sf::Vector2f(150, 50));
+    btnBST.setPosition(50, 310);
+    btnBST.setFillColor(sf::Color::Blue);
 
-            // 🔥 Dynamic menu based on DS
-            if (ds == 2) {
-                cout << "\n1. Push\n2. Pop\n3. Back\nChoice: ";
-            }
-            else if (ds == 3) {
-                cout << "\n1. Enqueue\n2. Dequeue\n3. Back\nChoice: ";
-            }
-            else {
-                cout << "\n1. Insert\n2. Delete\n3. Back\nChoice: ";
-            }
+    sf::RectangleShape btnAVL(sf::Vector2f(150, 50));
+    btnAVL.setPosition(50, 380);
+    btnAVL.setFillColor(sf::Color::Blue);
 
-            int op;
-            cin >> op;
-
-            if (op == 3) break;
-
-            vector<string> steps;
-            string structure;
-
-            // 🔥 Handle operations properly
-            switch (ds) {
-
-                case 1: { // Linked List
-                    int val;
-                    cout << "Enter value: ";
-                    cin >> val;
-                    steps = (op==1)?ll.insert(val):ll.remove(val);
-                    structure = ll.getStructure();
-                    break;
-                }
-
-                case 2: { // Stack
-                    if (op == 1) {
-                        int val;
-                        cout << "Enter value: ";
-                        cin >> val;
-                        steps = st.insert(val); // push
-                    } else {
-                        steps = st.remove(0); // pop (no input needed)
-                    }
-                    structure = st.getStructure();
-                    break;
-                }
-
-                case 3: { // Queue
-                    if (op == 1) {
-                        int val;
-                        cout << "Enter value: ";
-                        cin >> val;
-                        steps = q.insert(val); // enqueue
-                    } else {
-                        steps = q.remove(0); // dequeue
-                    }
-                    structure = q.getStructure();
-                    break;
-                }
-
-                case 4: { // BST
-                    int val;
-                    cout << "Enter value: ";
-                    cin >> val;
-                    steps = (op==1)?bst.insert(val):bst.remove(val);
-                    structure = bst.getStructure();
-                    break;
-                }
-
-                case 5: { // AVL
-                    int val;
-                    cout << "Enter value: ";
-                    cin >> val;
-                    steps = (op==1)?avl.insert(val):avl.remove(val);
-                    structure = avl.getStructure();
-                    break;
-                }
-            }
-
-            displaySteps(steps);
-            displayStructure(structure);
-
-            cout << "\nPress Enter...";
-            cin.ignore();
-            cin.get();
-        }
+    // Load Font
+    sf::Font font;
+    if (!font.loadFromFile("Roboto-Regular.ttf")) {
+        cout << "Error loading font\n";
     }
+
+    // Title
+    sf::Text title("Select Data Structure", font, 24);
+    title.setPosition(50, 30);
+    title.setFillColor(sf::Color::White);
+
+    // Button Texts
+    sf::Text textLL("Linked List", font, 16);
+    textLL.setPosition(60, 110);
+
+    sf::Text textStack("Stack", font, 16);
+    textStack.setPosition(60, 180);
+
+    sf::Text textQueue("Queue", font, 16);
+    textQueue.setPosition(60, 250);
+
+    sf::Text textBST("BST", font, 16);
+    textBST.setPosition(60, 320);
+
+    sf::Text textAVL("AVL", font, 16);
+    textAVL.setPosition(60, 390);
+
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed)
+                window.close();
+
+            if (event.type == sf::Event::MouseButtonPressed) {
+                int x = event.mouseButton.x;
+                int y = event.mouseButton.y;
+
+                if (btnLL.getGlobalBounds().contains(x, y)) {
+                    selectedDS = 1;
+                    cout << "Linked List selected\n";
+                }
+                if (btnStack.getGlobalBounds().contains(x, y)) {
+                    selectedDS = 2;
+                    cout << "Stack selected\n";
+                }
+                if (btnQueue.getGlobalBounds().contains(x, y)) {
+                    selectedDS = 3;
+                    cout << "Queue selected\n";
+                }
+                if (btnBST.getGlobalBounds().contains(x, y)) {
+                    selectedDS = 4;
+                    cout << "BST selected\n";
+                }
+                if (btnAVL.getGlobalBounds().contains(x, y)) {
+                    selectedDS = 5;
+                    cout << "AVL selected\n";
+                }
+            }
+        }
+
+        window.clear(sf::Color::Black);
+
+        window.draw(title);
+
+        window.draw(btnLL);
+        window.draw(btnStack);
+        window.draw(btnQueue);
+        window.draw(btnBST);
+        window.draw(btnAVL);
+
+        window.draw(textLL);
+        window.draw(textStack);
+        window.draw(textQueue);
+        window.draw(textBST);
+        window.draw(textAVL);
+
+        window.display();
+    }
+
+    return 0;
 }
