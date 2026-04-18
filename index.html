@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeVisualizer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+        :root[data-theme="dark"] {
+            --bg-color: #0f172a;
+            --surface-color: #1e293b;
+            --surface-hover: #334155;
+            --border-color: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --node-default: #334155;
+            --node-border: #475569;
+            --link-color: #64748b;
+
+            --ds-linkedlist: #3b82f6;
+            /* Blue */
+            --ds-stack: #a855f7;
+            /* Purple */
+            --ds-queue: #14b8a6;
+            /* Teal */
+            --ds-bst: #f59e0b;
+            /* Amber */
+            --ds-avl: #10b981;
+            /* Green */
+
+            --state-active: #3b82f6;
+            --state-found: #10b981;
+            --state-deleted: #ef4444;
+        }
+
+        :root[data-theme="light"] {
+            --bg-color: #f8fafc;
+            --surface-color: #ffffff;
+            --surface-hover: #f1f5f9;
+            --border-color: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --node-default: #ffffff;
+            --node-border: #cbd5e1;
+            --link-color: #94a3b8;
+
+            --ds-linkedlist: #2563eb;
+            --ds-stack: #9333ea;
+            --ds-queue: #0d9488;
+            --ds-bst: #d97706;
+            --ds-avl: #059669;
+
+            --state-active: #2563eb;
+            --state-found: #059669;
+            --state-deleted: #dc2626;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Navbar */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            height: 64px;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo span {
+            color: var(--active-accent, var(--ds-bst));
+            transition: color 0.3s;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .tab {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            background-color: var(--surface-hover);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background-color: var(--active-accent-light);
+            color: var(--active-accent);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--surface-hover);
+        }
+
+        /* Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 64px);
+        }
+
+        /* Panels */
+        .panel {
+            background-color: var(--surface-color);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            gap: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .left-panel {
+            width: 320px;
+        }
+
+        .right-panel {
+            width: 300px;
+            border-right: none;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .panel-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .panel-title {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        /* Controls */
+        textarea {
+            width: 100%;
+            height: 250px;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--active-accent);
+            box-shadow: 0 0 0 2px var(--active-accent-light);
+        }
+
+        button {
+            background-color: var(--surface-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background-color: var(--border-color);
+        }
+
+        button.primary {
+            background-color: var(--active-accent);
+            color: white;
+            border-color: var(--active-accent);
+        }
+
+        button.primary:hover {
+            filter: brightness(1.1);
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .playback-controls button {
+            flex: 1;
+        }
+
+        /* Canvas */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Log */
+        .log-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .log-item {
+            padding: 0.75rem;
+            background-color: var(--bg-color);
+            border-radius: 6px;
+            border-left: 4px solid var(--active-accent);
+            font-size: 0.875rem;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* D3 Node Styles */
+        .node circle,
+        .node rect {
+            fill: var(--node-default);
+            stroke: var(--active-accent);
+            stroke-width: 2px;
+            transition: fill 0.3s, stroke 0.3s;
+        }
+
+        .node text.val {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 14px;
+            fill: var(--text-primary);
+            text-anchor: middle;
+            dominant-baseline: central;
+            font-weight: 500;
+        }
+
+        .node text.label {
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            fill: var(--text-secondary);
+            text-anchor: middle;
+        }
+
+        .node text.bf {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .link {
+            fill: none;
+            stroke: var(--link-color);
+            stroke-width: 2px;
+            transition: stroke 0.3s;
+        }
+
+        .arrowhead {
+            fill: var(--link-color);
+        }
+
+        /* States */
+        .node.highlighted circle,
+        .node.highlighted rect {
+            fill: var(--active-accent-light);
+            stroke: var(--active-accent);
+            filter: drop-shadow(0 0 8px var(--active-accent-light));
+        }
+
+        .node.found circle,
+        .node.found rect {
+            stroke: var(--state-found);
+            fill: rgba(16, 185, 129, 0.2);
+            filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
+        }
+
+        .node.deleted circle,
+        .node.deleted rect {
+            stroke: var(--state-deleted);
+            opacity: 0.5;
+        }
+
+        .bf-balanced {
+            fill: var(--ds-avl);
+        }
+
+        .bf-unbalanced {
+            fill: var(--state-deleted);
+        }
+    </style>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <span>Code</span>Visualizer
+        </div>
+        <div class="tabs" id="ds-tabs">
+            <div class="tab" data-ds="linkedlist">Linked List</div>
+            <div class="tab" data-ds="stack">Stack</div>
+            <div class="tab" data-ds="queue">Queue</div>
+            <div class="tab active" data-ds="bst">BST</div>
+            <div class="tab" data-ds="avl">AVL Tree</div>
+        </div>
+        <button class="theme-toggle" id="theme-btn">🌙</button>
+    </nav>
+
+    <div class="main-container">
+        <aside class="panel left-panel">
+            <div class="panel-section">
+                <div class="panel-title">Operations</div>
+                
+                <input type="text" id="node-val" placeholder="e.g. 10 or 10,20,30" 
+                       style="width: 100%; padding: 0.75rem; background-color: var(--bg-color); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; font-family: 'Roboto Mono', monospace;">
+                
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                    <button class="primary" id="insert-btn" style="flex: 1;">Insert</button>
+                    <button id="delete-btn" style="flex: 1; background-color: var(--state-deleted); color: white; border-color: var(--state-deleted);">Delete</button>
+                </div>
+            </div>
+
+            <div class="panel-section" style="margin-top: 1.5rem;">
+                <div class="panel-title">Playback</div>
+                <div class="playback-controls">
+                    <button id="clear-btn">Clear All</button>
+                </div>
+            </div>
+
+            <div class="panel-section" style="margin-top: auto;">
+                <div class="panel-title">Instructions</div>
+                <p style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;">
+                    1. Ensure Node.js server is running.<br>
+                    2. Select a Data Structure.<br>
+                    3. Enter a number.<br>
+                    4. Click Insert or Delete.<br>
+                    5. UI will update dynamically.
+                </p>
+            </div>
+        </aside>
+
+        <main class="canvas-container" id="canvas-container">
+            <svg id="visualizer"></svg>
+        </main>
+
+        <aside class="panel right-panel">
+            <div class="panel-section">
+                <div class="panel-title">Operation History</div>
+                <ul class="log-list" id="log-list">
+                    <li class="log-item" style="opacity: 0.7;">Waiting for input...</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // === State Management ===
+        const state = {
+            theme: 'dark',
+            currentDS: 'bst',
+            operations: []
+        };
+
+        const dsColors = {
+            'linkedlist': 'var(--ds-linkedlist)',
+            'stack': 'var(--ds-stack)',
+            'queue': 'var(--ds-queue)',
+            'bst': 'var(--ds-bst)',
+            'avl': 'var(--ds-avl)'
+        };
+
+        const DURATION = 500;
+
+        // === DOM Elements ===
+        const svg = d3.select("#visualizer");
+        const canvasContainer = document.getElementById('canvas-container');
+        const logList = document.getElementById('log-list');
+        const nodeValInput = document.getElementById('node-val');
+        const root = document.documentElement;
+
+        // === Setup SVG Definitions ===
+        svg.append("defs").append("marker")
+            .attr("id", "arrowhead")
+            .attr("viewBox", "-0 -5 10 10")
+            .attr("refX", 25)
+            .attr("refY", 0)
+            .attr("orient", "auto")
+            .attr("markerWidth", 6)
+            .attr("markerHeight", 6)
+            .attr("xoverflow", "visible")
+            .append("svg:path")
+            .attr("d", "M 0,-5 L 10 ,0 L 0,5")
+            .attr("class", "arrowhead");
+
+        // === Theme Handling ===
+        document.getElementById('theme-btn').addEventListener('click', () => {
+            state.theme = state.theme === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', state.theme);
+            document.getElementById('theme-btn').textContent = state.theme === 'dark' ? '🌙' : '☀️';
+            updateColors();
+        });
+
+        function updateColors() {
+            root.style.setProperty('--active-accent', dsColors[state.currentDS]);
+            root.style.setProperty('--active-accent-light', `color-mix(in srgb, ${dsColors[state.currentDS]} 20%, transparent)`);
+        }
+
+        // === Tabs Handling ===
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                state.currentDS = e.target.dataset.ds;
+                updateColors();
+                updateButtonLabels();
+                clearCanvas();
+            });
+        });
+
+        function updateButtonLabels() {
+            const insertBtn = document.getElementById('insert-btn');
+            const deleteBtn = document.getElementById('delete-btn');
+            if (state.currentDS === 'stack') {
+                insertBtn.textContent = 'Push';
+                deleteBtn.textContent = 'Pop';
+            } else if (state.currentDS === 'queue') {
+                insertBtn.textContent = 'Enqueue';
+                deleteBtn.textContent = 'Dequeue';
+            } else {
+                insertBtn.textContent = 'Insert';
+                deleteBtn.textContent = 'Delete';
+            }
+        }
+
+        // Initialize colors and labels
+        updateColors();
+        updateButtonLabels();
+
+        // === Operations Handling ===
+        document.getElementById('insert-btn').addEventListener('click', () => handleOperation('i'));
+        document.getElementById('delete-btn').addEventListener('click', () => handleOperation('d'));
+        document.getElementById('clear-btn').addEventListener('click', () => {
+            state.operations = [];
+            logList.innerHTML = '';
+            addLog("Cleared all data");
+            clearCanvas();
+        });
+
+        async function handleOperation(type) {
+            const valStr = nodeValInput.value.trim();
+            if (!valStr && type !== 'd') return; // Pop/Dequeue might not need a value
+            
+            // Allow multiple values separated by commas or spaces
+            const vals = valStr.split(/[\s,]+/).filter(v => v !== '');
+            if (vals.length === 0 && type !== 'd') return;
+            
+            // For delete on Stack/Queue where value might be empty
+            if (vals.length === 0 && type === 'd') {
+                if (state.currentDS === 'stack' || state.currentDS === 'queue') {
+                    vals.push('0'); // dummy value to trigger pop/dequeue in backend
+                } else {
+                    addLog("Please enter a value to delete.");
+                    return;
+                }
+            }
+            
+            const typeMap = {
+                'linkedlist': 'll', 'stack': 'stack', 'queue': 'queue',
+                'bst': 'bst', 'avl': 'avl'
+            };
+            const backendType = typeMap[state.currentDS];
+            
+            // Add all operations
+            const newOps = vals.map(v => type + v);
+            state.operations.push(...newOps);
+            
+            const actionWord = type === 'i' ? document.getElementById('insert-btn').textContent : document.getElementById('delete-btn').textContent;
+            addLog(`${actionWord} ${vals.join(', ')}...`);
+            nodeValInput.value = '';
+
+            try {
+                const response = await fetch('http://localhost:3000/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: backendType, data: state.operations })
+                });
+
+                if (!response.ok) throw new Error("Server error");
+                
+                const rawData = await response.text();
+                const frame = JSON.parse(rawData);
+                
+                renderFrame(frame);
+                
+                // Print backend messages
+                if (frame.messages && frame.messages.length > 0) {
+                    frame.messages.forEach(msg => {
+                        addLog(`> ${msg}`);
+                    });
+                } else {
+                    addLog(`${actionWord} complete.`);
+                }
+
+            } catch (err) {
+                addLog("Error: Make sure server.js is running.");
+                console.error(err);
+                // pop the failed operations
+                for(let i=0; i<newOps.length; i++) state.operations.pop();
+            }
+        }
+
+        function addLog(msg) {
+            const li = document.createElement('li');
+            li.style.padding = "0.5rem";
+            li.style.borderBottom = "1px solid var(--border-color)";
+            li.style.fontSize = "0.85rem";
+            
+            if (msg.toLowerCase().includes("not found") || msg.toLowerCase().includes("error")) {
+                li.style.color = "var(--state-deleted)";
+                li.style.fontWeight = "bold";
+            }
+            
+            li.textContent = msg;
+            logList.appendChild(li);
+            logList.scrollTop = logList.scrollHeight;
+        }
+
+        function clearCanvas() {
+            svg.selectAll(".node").remove();
+            svg.selectAll(".link").remove();
+        }
+
+        // === Rendering Logic ===
+        function renderFrame(frame) {
+            const width = canvasContainer.clientWidth;
+            const height = canvasContainer.clientHeight;
+
+            const g = svg.selectAll("g.canvas-group").data([null]);
+            const gEnter = g.enter().append("g").attr("class", "canvas-group");
+            const canvasGroup = gEnter.merge(g);
+
+            if (state.currentDS === 'bst' || state.currentDS === 'avl') {
+                renderTree(canvasGroup, frame, width, height, state.currentDS === 'avl');
+            } else if (state.currentDS === 'linkedlist') {
+                renderLinkedList(canvasGroup, frame, width, height);
+            } else if (state.currentDS === 'stack') {
+                renderStack(canvasGroup, frame, width, height);
+            } else if (state.currentDS === 'queue') {
+                renderQueue(canvasGroup, frame, width, height);
+            }
+        }
+
+        // --- Tree Renderer (BST / AVL) ---
+        function renderTree(group, frame, width, height, isAVL) {
+            if (!frame.root || Object.keys(frame.root).length === 0) {
+                group.selectAll("*").remove();
+                return;
+            }
+
+            const hierarchy = d3.hierarchy(frame.root, d => {
+                let children = [];
+                if (d.left) children.push(d.left);
+                else if (d.right) children.push({ _dummy: true }); // Dummy for alignment
+
+                if (d.right) children.push(d.right);
+                else if (d.left) children.push({ _dummy: true });
+
+                return children.length ? children : null;
+            });
+
+            const treeLayout = d3.tree().size([width - 100, height - 150]);
+            const treeData = treeLayout(hierarchy);
+
+            // Filter out dummies
+            const nodes = treeData.descendants().filter(d => !d.data._dummy);
+            const links = treeData.links().filter(d => !d.target.data._dummy && !d.source.data._dummy);
+
+            // Center group
+            group.transition().duration(DURATION).attr("transform", `translate(50, 50)`);
+
+            // LINKS
+            const link = group.selectAll(".link")
+                .data(links, d => d.target.data.id || d.target.data.val);
+
+            const linkEnter = link.enter().insert("path", "g")
+                .attr("class", "link")
+                .attr("d", d => {
+                    const o = { x: d.source.x0 || width / 2, y: d.source.y0 || 0 };
+                    return d3.linkVertical()({ source: o, target: o });
+                });
+
+            link.merge(linkEnter).transition().duration(DURATION)
+                .attr("d", d3.linkVertical().x(d => d.x).y(d => d.y));
+
+            link.exit().transition().duration(DURATION)
+                .attr("d", d => {
+                    const o = { x: d.source.x, y: d.source.y };
+                    return d3.linkVertical()({ source: o, target: o });
+                }).remove();
+
+            // NODES
+            const node = group.selectAll(".node")
+                .data(nodes, d => d.data.id || d.data.val);
+
+            const nodeEnter = node.enter().append("g")
+                .attr("class", d => getClasses("node", d.data.val, frame))
+                .attr("transform", d => `translate(${d.parent ? d.parent.x0 || width / 2 : width / 2},${d.parent ? d.parent.y0 || 0 : 0})`);
+
+            nodeEnter.append("circle")
+                .attr("r", 0)
+                .transition().duration(DURATION)
+                .attr("r", 20);
+
+            nodeEnter.append("text")
+                .attr("class", "val")
+                .attr("dy", "1px")
+                .style("fill-opacity", 0)
+                .text(d => d.data.val)
+                .transition().duration(DURATION)
+                .style("fill-opacity", 1);
+
+            if (isAVL) {
+                nodeEnter.append("text")
+                    .attr("class", d => `bf ${Math.abs(d.data.bf || 0) > 1 ? 'bf-unbalanced' : 'bf-balanced'}`)
+                    .attr("dy", "-25px")
+                    .attr("dx", "15px")
+                    .style("fill-opacity", 0)
+                    .text(d => d.data.bf !== undefined ? `bf:${d.data.bf}` : '')
+                    .transition().duration(DURATION)
+                    .style("fill-opacity", 1);
+
+                nodeEnter.append("text")
+                    .attr("class", "label rotation")
+                    .attr("dy", "-40px")
+                    .style("fill", "var(--ds-avl)")
+                    .text(d => d.data.rotation || "");
+            }
+
+            const nodeUpdate = node.merge(nodeEnter);
+
+            nodeUpdate.transition().duration(DURATION)
+                .attr("transform", d => `translate(${d.x},${d.y})`)
+                .attr("class", d => getClasses("node", d.data.val, frame));
+
+            if (isAVL) {
+                nodeUpdate.select(".bf")
+                    .attr("class", d => `bf ${Math.abs(d.data.bf || 0) > 1 ? 'bf-unbalanced' : 'bf-balanced'}`)
+                    .text(d => d.data.bf !== undefined ? `bf:${d.data.bf}` : '');
+
+                nodeUpdate.select(".rotation")
+                    .text(d => d.data.rotation || "");
+            }
+
+            const nodeExit = node.exit().transition().duration(DURATION)
+                .attr("transform", d => `translate(${d.parent ? d.parent.x : width / 2},${d.parent ? d.parent.y : 0})`)
+                .remove();
+
+            nodeExit.select("circle").attr("r", 0);
+            nodeExit.select("text").style("fill-opacity", 0);
+
+            // Store positions for next transition
+            nodes.forEach(d => {
+                d.x0 = d.x;
+                d.y0 = d.y;
+            });
+        }
+
+        // --- Linked List Renderer ---
+        function renderLinkedList(group, frame, width, height) {
+            let nodesData = frame.nodes || [];
+            
+            // Map to objects to ensure unique keys, handle duplicates
+            const counts = {};
+            nodesData = nodesData.map(v => {
+                counts[v] = (counts[v] || 0) + 1;
+                return { val: v, id: `node-${v}-${counts[v]}` };
+            });
+            // Add NULL node at the end
+            nodesData.push({ val: "NULL", id: "node-null" });
+            
+            const spacing = 80;
+            const startX = Math.max(50, (width - (nodesData.length * spacing)) / 2);
+            const y = height / 2;
+
+            group.transition().duration(DURATION).attr("transform", `translate(0, 0)`);
+
+            // Links (Arrows)
+            const linksData = nodesData.slice(0, -1).map((_, i) => ({ source: i, target: i + 1 }));
+            
+            const link = group.selectAll(".link").data(linksData, d => d.source);
+            
+            link.enter().append("line")
+                .attr("class", "link")
+                .attr("marker-end", "url(#arrowhead)")
+                .attr("x1", d => startX + d.source * spacing + 25)
+                .attr("y1", y)
+                .attr("x2", d => startX + d.source * spacing + 25) // start small
+                .attr("y2", y)
+                .merge(link)
+                .transition().duration(DURATION)
+                .attr("x1", d => startX + d.source * spacing + 25)
+                .attr("x2", d => startX + d.target * spacing - 25)
+                .attr("y1", y)
+                .attr("y2", y);
+
+            link.exit().remove();
+
+            // Nodes (Rectangles)
+            const node = group.selectAll(".node").data(nodesData, d => d.id);
+
+            const nodeEnter = node.enter().append("g")
+                .attr("class", (d, i) => getClasses("node", d.val, frame, i))
+                .attr("transform", (d, i) => `translate(${startX + i * spacing}, ${y - 50})`); // Drop from above
+
+            nodeEnter.append("rect")
+                .attr("width", 50)
+                .attr("height", 40)
+                .attr("x", -25)
+                .attr("y", -20)
+                .attr("rx", 5)
+                .style("fill", d => d.val === "NULL" ? "transparent" : "var(--node-default)")
+                .style("stroke-dasharray", d => d.val === "NULL" ? "4,4" : "none");
+
+            nodeEnter.append("text")
+                .attr("class", "val")
+                .text(d => d.val);
+
+            const nodeUpdate = node.merge(nodeEnter);
+            nodeUpdate.transition().duration(DURATION)
+                .attr("transform", (d, i) => `translate(${startX + i * spacing}, ${y})`)
+                .attr("class", (d, i) => getClasses("node", d.val, frame, i));
+
+            node.exit()
+                .transition().duration(DURATION)
+                .attr("transform", (d, i) => `translate(${startX + i * spacing}, ${y + 50})`) // Drop down to exit
+                .style("opacity", 0)
+                .remove();
+        }
+
+        // --- Stack Renderer ---
+        function renderStack(group, frame, width, height) {
+            let nodesData = frame.nodes || [];
+            
+            // To allow duplicates but keep stable keys, we can count occurrences.
+            // But simple value binding usually suffices for these basic visualizers.
+            const counts = {};
+            nodesData = nodesData.map(v => {
+                counts[v] = (counts[v] || 0) + 1;
+                return { val: v, id: `node-${v}-${counts[v]}` };
+            });
+            
+            const rectW = 100, rectH = 40, spacing = 45;
+            const x = width / 2;
+            const baseY = height - 50;
+
+            group.transition().duration(DURATION).attr("transform", `translate(0, 0)`);
+
+            const node = group.selectAll(".node").data(nodesData, d => d.id);
+
+            const nodeEnter = node.enter().append("g")
+                .attr("class", (d, i) => getClasses("node", d.val, frame, i))
+                .attr("transform", `translate(${x}, 0)`) // Drop from very top
+                .style("opacity", 0);
+
+            nodeEnter.append("rect")
+                .attr("width", rectW)
+                .attr("height", rectH)
+                .attr("x", -rectW / 2)
+                .attr("y", -rectH / 2)
+                .attr("rx", 4);
+
+            nodeEnter.append("text")
+                .attr("class", "val")
+                .text(d => d.val);
+
+            nodeEnter.append("text")
+                .attr("class", "label top-label")
+                .attr("dx", rectW / 2 + 40) // Put TOP pointer on the right side
+                .attr("dy", 0)
+                .style("font-weight", "bold")
+                .style("fill", "var(--ds-stack)");
+
+            const nodeUpdate = node.merge(nodeEnter);
+
+            nodeUpdate.select(".top-label").text((d, i) => i === nodesData.length - 1 ? "⬅ TOP" : "");
+
+            nodeUpdate.transition().duration(DURATION)
+                .attr("transform", (d, i) => `translate(${x}, ${baseY - i * spacing})`)
+                .attr("class", (d, i) => getClasses("node", d.val, frame, i))
+                .style("opacity", 1);
+
+            node.exit()
+                .transition().duration(DURATION)
+                .attr("transform", `translate(${x}, -50)`) // fly up
+                .style("opacity", 0)
+                .remove();
+        }
+
+        // --- Queue Renderer ---
+        function renderQueue(group, frame, width, height) {
+            let nodesData = frame.nodes || [];
+            
+            // Stable IDs based on value + occurrence
+            const counts = {};
+            nodesData = nodesData.map(v => {
+                counts[v] = (counts[v] || 0) + 1;
+                return { val: v, id: `node-${v}-${counts[v]}` };
+            });
+            
+            const rectW = 60, rectH = 60, spacing = 65;
+            const startX = Math.max(50, (width - (nodesData.length * spacing)) / 2);
+            const y = height / 2;
+
+            group.transition().duration(DURATION).attr("transform", `translate(0, 0)`);
+
+            // Use the object's ID for data binding
+            const node = group.selectAll(".node").data(nodesData, d => d.id || d.val);
+
+            const nodeEnter = node.enter().append("g")
+                .attr("class", (d, i) => getClasses("node", d.val, frame, i))
+                .attr("transform", `translate(${width + 50}, ${y})`); // enter from right
+
+            nodeEnter.append("rect")
+                .attr("width", rectW)
+                .attr("height", rectH)
+                .attr("x", -rectW / 2)
+                .attr("y", -rectH / 2)
+                .attr("rx", 8);
+
+            nodeEnter.append("text")
+                .attr("class", "val")
+                .text(d => d.val);
+
+            nodeEnter.append("text")
+                .attr("class", "label q-label top-label")
+                .attr("dy", -rectH / 2 - 15)
+                .style("font-weight", "bold")
+                .style("fill", "var(--ds-queue)");
+
+            const nodeUpdate = node.merge(nodeEnter);
+
+            nodeUpdate.select(".q-label").text((d, i) => {
+                if (i === 0 && i === nodesData.length - 1) return "FRONT / REAR";
+                if (i === 0) return "FRONT ⬇";
+                if (i === nodesData.length - 1) return "⬇ REAR";
+                return "";
+            });
+
+            nodeUpdate.transition().duration(DURATION)
+                .attr("transform", (d, i) => `translate(${startX + i * spacing}, ${y})`)
+                .attr("class", (d, i) => getClasses("node", d.val, frame, i));
+
+            node.exit()
+                .transition().duration(DURATION)
+                .attr("transform", `translate(-50, ${y})`) // exit to left
+                .style("opacity", 0)
+                .remove();
+        }
+
+        // === Utility ===
+        function getClasses(base, val, frame, idx = null) {
+            let cls = base;
+            if (frame.highlighted && (frame.highlighted.includes(val) || (idx !== null && frame.highlighted.includes(idx)))) {
+                cls += " highlighted";
+            }
+            if (frame.found && (frame.found.includes(val) || (idx !== null && frame.found.includes(idx)))) {
+                cls += " found";
+            }
+            if (frame.deleted && (frame.deleted.includes(val) || (idx !== null && frame.deleted.includes(idx)))) {
+                cls += " deleted";
+            }
+            return cls;
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (state.frames.length > 0 && state.currentFrameIdx >= 0) {
+                renderFrame(state.frames[state.currentFrameIdx]);
+            }
+        });
+
+    </script>
+</body>
+
+</html>

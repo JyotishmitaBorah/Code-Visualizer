@@ -23,7 +23,9 @@ vector<string> LinkedList::remove(int x) {
     if (!head) return {"Empty list"};
 
     if (head->data == x) {
+        Node* toDelete = head;
         head = head->next;
+        delete toDelete;
         return {"Deleted head"};
     }
 
@@ -32,7 +34,9 @@ vector<string> LinkedList::remove(int x) {
         t = t->next;
 
     if (t->next) {
+        Node* toDelete = t->next;
         t->next = t->next->next;
+        delete toDelete;
         return {"Deleted node"};
     }
 
@@ -41,13 +45,13 @@ vector<string> LinkedList::remove(int x) {
 
 string LinkedList::getStructure() {
     stringstream ss;
+    ss << "{\"type\": \"linkedlist\", \"nodes\": [";
     Node* t = head;
-
     while (t) {
-        ss << t->data << " -> ";
+        ss << t->data;
+        if (t->next) ss << ", ";
         t = t->next;
     }
-    ss << "NULL";
-
+    ss << "]}";
     return ss.str();
 }

@@ -16,12 +16,17 @@ vector<string> StackDS::remove(int) {
 
 string StackDS::getStructure() {
     stack<int> temp = st;
-    stringstream ss;
-
-    ss << "Top\n";
+    vector<int> rev;
     while (!temp.empty()) {
-        ss << "| " << temp.top() << " |\n";
+        rev.push_back(temp.top());
         temp.pop();
     }
+    stringstream ss;
+    ss << "{\"type\": \"stack\", \"nodes\": [";
+    for (int i = rev.size() - 1; i >= 0; i--) {
+        ss << rev[i];
+        if (i > 0) ss << ", ";
+    }
+    ss << "]}";
     return ss.str();
 }

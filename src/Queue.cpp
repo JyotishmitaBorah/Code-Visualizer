@@ -17,13 +17,14 @@ vector<string> QueueDS::remove(int) {
 string QueueDS::getStructure() {
     queue<int> temp = q;
     stringstream ss;
-
-    ss << "Front -> ";
+    ss << "{\"type\": \"queue\", \"nodes\": [";
+    bool first = true;
     while (!temp.empty()) {
-        ss << temp.front() << " ";
+        if (!first) ss << ", ";
+        ss << temp.front();
         temp.pop();
+        first = false;
     }
-    ss << "<- Rear";
-
+    ss << "]}";
     return ss.str();
 }

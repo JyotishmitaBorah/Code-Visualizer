@@ -177,13 +177,25 @@ void AVL::build(AVLNode* node, string prefix, bool isLeft, string& result) {
     build(node->right, prefix + (isLeft ? "|   " : "    "), false, result);
 }
 
+void toJson(AVLNode* node, string& res) {
+    if (!node) {
+        res += "null";
+        return;
+    }
+    int leftH = node->left ? node->left->height : 0;
+    int rightH = node->right ? node->right->height : 0;
+    int bf = leftH - rightH;
+    res += "{\"val\":" + to_string(node->data) + ",\"bf\":" + to_string(bf) + ",\"left\":";
+    toJson(node->left, res);
+    res += ",\"right\":";
+    toJson(node->right, res);
+    res += "}";
+}
+
 // FINAL STRUCTURE
 string AVL::getStructure() {
-    if (!root) return "Empty AVL";
-
-    string result = to_string(root->data) + "\n";
-    build(root->left, "", true, result);
-    build(root->right, "", false, result);
-
-    return result;
+    string res = "{\"type\": \"avl\", \"root\": ";
+    toJson(root, res);
+    res += "}";
+    return res;
 }

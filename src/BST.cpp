@@ -85,12 +85,22 @@ void BST::printTree(BSTNode* node, string prefix, bool isLeft, string& res) {
     printTree(node->left, prefix + (isLeft ? "|   " : "    "), true, res);
     printTree(node->right, prefix + (isLeft ? "|   " : "    "), false, res);
 }
+void toJson(BSTNode* node, string& res) {
+    if (!node) {
+        res += "null";
+        return;
+    }
+    res += "{\"val\":" + to_string(node->data) + ",\"left\":";
+    toJson(node->left, res);
+    res += ",\"right\":";
+    toJson(node->right, res);
+    res += "}";
+}
 
 // ================= STRUCTURE =================
 string BST::getStructure() {
-    if (!root) return "Empty BST";
-
-    string res = "";
-    printTree(root, "", false, res);
+    string res = "{\"type\": \"bst\", \"root\": ";
+    toJson(root, res);
+    res += "}";
     return res;
 }
